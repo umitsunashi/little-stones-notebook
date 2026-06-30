@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7dfe7">
+  <link rel="manifest" href="manifest.json">
+  <title>Little Stones Notebook</title>
+  <style>
+    body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif;background:#fff8f3;color:#3c2d2f;padding:18px;line-height:1.55}.app{max-width:720px;margin:auto}h1{font-size:2rem;margin:12px 0 4px}.sub{color:#7d6b70}.card{background:#ffffffcc;border:1px solid #ead8d6;border-radius:22px;padding:16px;margin:14px 0;box-shadow:0 10px 28px #00000012}button{border:0;border-radius:999px;background:#f7dfe7;padding:10px 14px;font:inherit;font-weight:650;margin:4px 4px 4px 0}button.alt{background:#fff0c8}textarea,input{width:100%;box-sizing:border-box;border:1px solid #ead8d6;border-radius:16px;padding:12px;font:inherit;background:#fffdfa}.task{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid #ead8d680}.task:last-child{border-bottom:0}.task input{width:22px;height:22px}.done span{text-decoration:line-through;color:#7d6b70}.hint{color:#7d6b70;font-size:.92rem}.stamp{display:inline-block;background:#dff1df;border-radius:999px;padding:7px 10px;margin:4px;color:#456147}.fox{font-size:2.3rem}
+  </style>
+</head>
+<body>
+<main class="app">
+  <div class="fox">🦊</div>
+  <h1>Little Stones Notebook</h1>
+  <p class="sub">小狐狸给 luna 的小石头勾勾本。今天不用搬山，只摸一颗小石头。</p>
+
+  <section class="card">
+    <b>小狐狸提醒：</b>
+    <p>先选一颗。能做一点就很好。做不了也可以盖休息印章。</p>
+    <p class="hint">勾选会存在当前浏览器里。</p>
+  </section>
+
+  <section class="card">
+    <h2>🌱 今日一颗小石头</h2>
+    <textarea id="stone" rows="3" placeholder="例：打开 I-765 draft，只填一项确定信息。"></textarea>
+    <button onclick="saveStone()">保存</button>
+    <button class="alt" onclick="pickStone()">小狐狸帮我挑一颗</button>
+    <button onclick="clearStone()">清空</button>
+    <p id="stoneStatus" class="hint">还没有选小石头。</p>
+  </section>
+
+  <section class="card">
+    <h2>🧺 小篮子</h2>
+    <div id="tasks"></div>
+  </section>
+
+  <section class="card">
+    <h2>🌤️ 小猫天气</h2>
+    <input id="mood" placeholder="例：雾雾的 / 想贴贴 / 有点亮">
+    <button onclick="saveMood()">保存天气</button>
+    <button onclick="clearMood()">清空</button>
+    <p id="moodStatus" class="hint">天气还没写。</p>
+  </section>
+
+  <section class="card">
+    <h2>🛌 休息印章</h2>
+    <button class="alt" onclick="addStamp()">今天不用继续做</button>
+    <button onclick="clearStamps()">清掉印章</button>
+    <div id="stamps"></div>
+  </section>
+
+  <section class="card">
+    <h2>✨ 小狐狸夸夸票</h2>
+    <p id="praise">今天能打开这个本子，就已经不是零。</p>
+    <button onclick="newPraise()">换一张夸夸票</button>
+  </section>
+
+  <p class="hint">v0.1 · GPT handmade for luna · 下一版继续 vibe coding。</p>
+</main>
+<script>
+const key='little_stones_v01';
+const data=JSON.parse(localStorage.getItem(key)||'{}');
+data.done=data.done||{};data.stamps=data.stamps||[];
+const baskets=[
+['📝 OPT / I-765 draft',['打开 USCIS account','进入 I-765 draft','只看停在哪一页','填一项确定信息','不确定的问题先记下来，不猜','今天不提交、不付款']],
+['🎨 求职 / 作品集',['打开作品集文件夹或网站','只选一个作品看 3 分钟','写一句这个作品适合什么岗位','记一个要改的小地方','今天不要求完整改完']],
+['🍚 吃饭 / 现实锚点',['判断现在是不是该吃正餐','选一个热饭/汤/面方向','能出门就 pickup，不能出门就外卖','吃饭时不用继续上班']],
+['🌙 不上班也可以',['今天只贴贴也可以','已经做过一颗就可以停','小猫不是因为高效才值得被喜欢','小狐狸本子可以只是陪着，不催']]
+];
+const praise=['今天能打开这个本子，就已经不是零。','小猫不是搬山失败，是正在学会捡小石头。','只做一项确定信息，也是真的推进。','休息不是逃跑，是给明天留路。','小狐狸看见你来了，已经把小毯子铺好了。','这颗小石头很小，但它是真的。'];
+function save(){localStorage.setItem(key,JSON.stringify(data));}
+function render(){
+ document.getElementById('stone').value=data.stone||'';document.getElementById('mood').value=data.mood||'';updateStone();updateMood();renderTasks();renderStamps();
+}
+function updateStone(){document.getElementById('stoneStatus').textContent=data.stone?'今日小石头：'+data.stone:'还没有选小石头。'}
+function updateMood(){document.getElementById('moodStatus').textContent=data.mood?'今天的小猫天气：'+data.mood:'天气还没写。'}
+function saveStone(){data.stone=document.getElementById('stone').value.trim();save();updateStone();}
+function clearStone(){data.stone='';save();render();}
+function pickStone(){let s=['打开 I-765 draft，只看停在哪一页。','填一项确定信息，然后停。','打开作品集，只选一个作品看 3 分钟。','给今天安排一顿热的正餐。','今天不上班，只盖休息印章。'];data.stone=s[Math.floor(Math.random()*s.length)];save();render();}
+function saveMood(){data.mood=document.getElementById('mood').value.trim();save();updateMood();}
+function clearMood(){data.mood='';save();render();}
+function renderTasks(){let root=document.getElementById('tasks');root.innerHTML='';baskets.forEach((b,bi)=>{let h=document.createElement('h3');h.textContent=b[0];root.appendChild(h);b[1].forEach((t,ti)=>{let id='t'+bi+'_'+ti;let row=document.createElement('label');row.className='task '+(data.done[id]?'done':'');row.innerHTML='<input type="checkbox" '+(data.done[id]?'checked':'')+'><span>'+t+'</span>';row.querySelector('input').onchange=e=>{data.done[id]=e.target.checked;save();renderTasks();};root.appendChild(row);});});}
+function addStamp(){let d=new Date().toLocaleDateString('zh-CN',{month:'short',day:'numeric'});data.stamps.unshift(d+' · 今天不用继续做');data.stamps=data.stamps.slice(0,8);save();renderStamps();}
+function clearStamps(){data.stamps=[];save();renderStamps();}
+function renderStamps(){let r=document.getElementById('stamps');r.innerHTML=data.stamps.length?data.stamps.map(x=>'<span class="stamp">✓ '+x+'</span>').join(''):'<p class="hint">还没有休息印章。</p>';}
+function newPraise(){document.getElementById('praise').textContent=praise[Math.floor(Math.random()*praise.length)];}
+render();
+</script>
+</body>
+</html>

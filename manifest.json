@@ -1,0 +1,9 @@
+{
+  "name": "Little Stones Notebook",
+  "short_name": "Little Stones",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#fff8f3",
+  "theme_color": "#f7dfe7",
+  "description": "小狐狸给 luna 的小石头勾勾本。"
+}
